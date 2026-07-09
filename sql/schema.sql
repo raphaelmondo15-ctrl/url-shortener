@@ -25,4 +25,4 @@ CREATE TABLE clicks (
 
 CREATE INDEX idx_clicks_link_id ON clicks(link_id);
 
--- UPDATE links SET click_count = click_count + 1 WHERE  code = 'your_short_code';
+UPDATE links SET click_count = click_count + 1 WHERE  code = 'your_short_code';
