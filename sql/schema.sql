@@ -1,13 +1,14 @@
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- CREATE TABLE users (
+--     id SERIAL PRIMARY KEY,
+--     username VARCHAR(255) NOT NULL,
+--     password VARCHAR(255) NOT NULL,
+--     email VARCHAR(255) NOT NULL UNIQUE,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
 
 CREATE TABLE links (
     id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     code VARCHAR(16) NOT NULL UNIQUE,
     target_url TEXT NOT NULL,
     created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
