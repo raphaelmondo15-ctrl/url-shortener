@@ -9,7 +9,7 @@
 CREATE TABLE links (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    code VARCHAR(16) NOT NULL UNIQUE,
+    short_url VARCHAR(16) NOT NULL UNIQUE,
     target_url TEXT NOT NULL,
     created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMPTZ,
