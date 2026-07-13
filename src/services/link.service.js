@@ -27,3 +27,10 @@ export async function createShortLink(target_url) {
     return rows[0];
 }
 
+export async function getLinkByShortCode(short_code) {
+    const { rows } = await pool.query(
+        'SELECT * FROM links WHERE short_code = $1',
+        [short_code]
+    );
+    return rows[0] || null;
+}
