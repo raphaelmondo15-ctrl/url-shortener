@@ -26,3 +26,4 @@ export async function createShortLink(target_url) {
 
     return rows[0];
 }
+

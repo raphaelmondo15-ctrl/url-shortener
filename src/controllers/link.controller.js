@@ -1,10 +1,10 @@
-import pool from '../config/db.js';
+import { createShortLink } from '../services/link.service.js';
 
 export const createLink = async (req, res) => {
     try {
         const { target_url } = req.body;
-        const { rows } = await pool.query('INSERT INTO links (target_url) VALUES ($1) RETURNING *', [target_url]);
-        res.status(201).json(rows[0]);
+        const newLink = await createShortLink(target_url);
+        res.status(201).json(newLink);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -12,10 +12,15 @@ export const createLink = async (req, res) => {
 
 export const getOriginalLink = async (req, res) => {
     try {
-        const { short_url } = req.params;
-        const { rows } = await pool.query('SELECT * FROM links WHERE short_url = $1', [short_url]);
-        res.status(200).json(rows[0]);
+        const { short_code } = req.params;
+        const link = await getLinkByShortCode(short_code);
+
+        if (!link) {
+            return res.status(404).json({ error: 'Link not found' });
+        }
+
+        res.redirect(link.target_url);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-};
+}
