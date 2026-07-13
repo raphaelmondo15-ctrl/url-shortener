@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import {testDbConnection} from '../controllers/db.controller.js';
-import { createShortLink, getOriginalLink } from '../controllers/link.controller.js';
+import { createLink, getOriginalLink } from '../controllers/link.controller.js';
+import { validateLink } from '../middleware/validateLink.middleware.js';
+
 
 const router = Router();
 
 router.get('/test-db', testDbConnection);
-router.post('/shorten', createShortLink);
-router.get('/:short_url', getOriginalLink);
+router.post('/shorten', validateLink, createLink);
+router.get('/:short_code', getOriginalLink);
 
 export default router;
