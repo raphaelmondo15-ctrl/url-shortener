@@ -32,5 +32,15 @@ export async function getLinkByShortCode(short_code) {
         'SELECT * FROM links WHERE short_code = $1',
         [short_code]
     );
-    return rows[0] || null;
+    const link = rows[0];
+
+   if (!link) {
+     return null;
+   }
+
+   if (link.expires_at && new Date(link.expires_at) < new Date()) {
+        throw new Error('Link has expired');
+    }
+
+    return link;
 }
