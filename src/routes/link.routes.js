@@ -9,5 +9,6 @@ const router = Router();
 router.get('/test-db', testDbConnection);
 router.post('/shorten', validateLink, createLink);
 router.get('/:short_code', getOriginalLink);
+router.delete('/links/:short_code', deleteLink);
 
 export default router;

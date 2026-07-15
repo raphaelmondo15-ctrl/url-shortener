@@ -31,4 +31,18 @@ export const getOriginalLink = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-   
+
+export const deleteLink = async (req, res) => {
+    try {
+        const { short_code } = req.params;
+        const result = await deleteLinkByShortCode(short_code);
+
+        res.status(200).json({ message: 'Link deleted successfully', result });
+    } catch (error) {
+        if (error.message === 'LINK_NOT_FOUND') {
+            return res.status(404).json({ error: 'Link not found' });
+        }
+
+        res.status(500).json({ error: error.message });
+    }
+};

@@ -81,3 +81,14 @@ export async function processRedirect(shortCode, clickData) {
         client.release();
     }
 }
+
+export async function deleteLinkByShortCode(short_code) {
+    const { rowCount, rows } = await pool.query(
+        'DELETE FROM links WHERE short_code = $1 RETURNING *',
+        [short_code]
+    );
+    if (rowCount === 0) {
+        throw new Error('LINK_NOT_FOUND');
+    }
+    return rows[0];
+}
