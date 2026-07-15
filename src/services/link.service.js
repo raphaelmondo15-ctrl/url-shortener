@@ -46,31 +46,38 @@ export async function createShortLink(target_url) {
 // }
 
 export async function processRedirect(shortCode, clickData) {
-    const { rows } = await pool.query(
-        'SELECT * FROM links WHERE short_code = $1',
-        [shortCode]
-    );
-    const link = rows[0];
+    const client = await pool.connection();
 
-    if (!link) {
-        throw new Error('Link not found');
+    try {
+        await client.query('BEGIN');
+
+        const { rows } = await client.query(
+            'SELECT id, target_url, expires_at FROM links WHERE short_code = $1',
+            [shortCode]
+        );
+
+        const link = rows[0];
+
+        if (!link) {
+            throw new Error('LINK_NOT_FOUND');
+        }
+
+        if (link.expires_at && new Date(link.expires_at) < new Date()) {
+            throw new Error('LINK_EXPIRED');
+        }
+
+        await client.query(
+            'INSERT INTO clicks (link_id, referrer, user_agent) VALUES ($1, $2, $3)',
+            [link.id, clickData.referrer, clickData.userAgent]
+        );
+
+        await client.query('COMMIT');
+
+        return link;
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
     }
-
-    if (link.expires_at && new Date(link.expires_at) < new Date()) {
-        throw new Error('LINK_EXPIRED');
-    }
-
-    await pool.query(
-        `UPDATE links
-         SET click_count = click_count + 1
-         WHERE id = $1`,
-        [link.id]
-    );
-        
-    await pool.query(
-        `INSERT INTO clicks (link_id, referrer, user_agent) VALUES ($1, $2, $3)`,
-        [link.id, clickData.referrer, clickData.userAgent]
-    );
-
-    return link;
 }
