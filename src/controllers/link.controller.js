@@ -1,4 +1,4 @@
-import { createShortLink } from '../services/link.service.js';
+import { createShortLink, processRedirect } from '../services/link.service.js';
 
 export const createLink = async (req, res) => {
     try {
@@ -13,17 +13,22 @@ export const createLink = async (req, res) => {
 export const getOriginalLink = async (req, res) => {
     try {
         const { short_code } = req.params;
-        const link = await getLinkByShortCode(short_code);
-
-        if (!link) {
-            return res.status(404).json({ error: 'Link not found' });
-        }
+        const link = await processRedirect(short_code, {
+            referrer: req.get('referer') || null,
+            userAgent: req.get('user-agent') || null
+        });
 
         res.redirect(link.target_url);
     } catch (error) {
-        if (error.message === 'Link has expired') {
+        if (error.message === 'LINK_NOT_FOUND') {
+            return res.status(404).json({ error: 'Link not found' });
+        }
+
+        if (error.message === 'LINK_EXPIRED') {
             return res.status(410).json({ error: 'Link has expired' });
         }
+
         res.status(500).json({ error: error.message });
     }
-}
+};
+   
