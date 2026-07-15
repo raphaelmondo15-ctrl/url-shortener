@@ -21,6 +21,9 @@ export const getOriginalLink = async (req, res) => {
 
         res.redirect(link.target_url);
     } catch (error) {
+        if (error.message === 'Link has expired') {
+            return res.status(410).json({ error: 'Link has expired' });
+        }
         res.status(500).json({ error: error.message });
     }
 }
