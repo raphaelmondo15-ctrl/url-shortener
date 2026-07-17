@@ -1,14 +1,14 @@
 import { createLinkSchema } from '../schemas/link.schema.js';
 
 export function validateLink(req, res, next) {
-    const result = createLinkSchema.safeParse(req.body);
+    const parsed = createLinkSchema.safeParse(req.body);
 
-    if (!result.success) {
+    if (!parsed.success) {
         return res.status(400).json({
-            error: result.error.issues[0].message
+            error: parsed.error.issues[0].message
         });
         }
 
-        req.validatedData = result.data;
+        req.validatedData = parsed.data;
         next();
 }

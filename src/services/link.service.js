@@ -1,7 +1,7 @@
 import pool from '../config/db.js';
 import { generateShortCode } from './shortCode.service.js';
 
-export async function createShortLink(target_url) {
+export async function createShortLink(target_url, code, expires_at) {
     let shortCode;
 
     while (true) {
