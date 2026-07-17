@@ -8,7 +8,7 @@ export async function createShortLink(target_url) {
         shortCode = generateShortCode();
 
         const { rows } = await pool.query(
-            'SELECT id FROM links WHERE short_code = $1',
+            'SELECT id FROM links WHERE short_url = $1',
             [shortCode]
         );
 
@@ -18,7 +18,7 @@ export async function createShortLink(target_url) {
     }
 
     const { rows } = await pool.query(
-        `INSERT INTO links (target_url, short_code)
+        `INSERT INTO links (target_url, short_url)
          VALUES ($1, $2)
          RETURNING *`,
         [target_url, shortCode]
@@ -52,7 +52,7 @@ export async function processRedirect(shortCode, clickData) {
         await client.query('BEGIN');
 
         const { rows } = await client.query(
-            'SELECT id, target_url, expires_at FROM links WHERE short_code = $1',
+            'SELECT id, target_url, expires_at FROM links WHERE short_url = $1',
             [shortCode]
         );
 
@@ -84,11 +84,19 @@ export async function processRedirect(shortCode, clickData) {
 
 export async function deleteLinkByShortCode(short_code) {
     const { rowCount, rows } = await pool.query(
-        'DELETE FROM links WHERE short_code = $1 RETURNING *',
+        'DELETE FROM links WHERE short_url = $1 RETURNING *',
         [short_code]
     );
     if (rowCount === 0) {
         throw new Error('LINK_NOT_FOUND');
     }
     return rows[0];
+}
+
+export async function exportClicksToCSV(short_code) {
+    const { rows } = await pool.query(
+        'SELECT clicks.referrer, clicks.user_agent, clicks.created_at FROM clicks JOIN links ON clicks.link_id = links.id WHERE links.short_url = $1',
+        [short_code]
+    );
+    return rows;
 }

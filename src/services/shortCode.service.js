@@ -8,3 +8,5 @@ function generateShortCode(length = 6) {
     }
     return shortCode;
 }
+
+export { generateShortCode };

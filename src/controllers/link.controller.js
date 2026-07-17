@@ -34,8 +34,8 @@ export const getOriginalLink = async (req, res) => {
 
 export const deleteLink = async (req, res) => {
     try {
-        const { short_code } = req.params;
-        const result = await deleteLinkByShortCode(short_code);
+        const { short_url } = req.params;
+        const result = await deleteLinkByShortCode(short_url);
 
         res.status(200).json({ message: 'Link deleted successfully', result });
     } catch (error) {
