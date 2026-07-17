@@ -1,10 +1,14 @@
+import { createLinkSchema } from '../schemas/link.schema.js';
+
 export function validateLink(req, res, next) {
-    const { target_url } = req.body;
-    const urlPattern = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/;
+    const result = createLinkSchema.safeParse(req.body);
 
-    if (!urlPattern.test(target_url)) {
-        return res.status(400).json({ error: 'Invalid URL format' });
-    }
+    if (!result.success) {
+        return res.status(400).json({
+            error: result.error.issues[0].message
+        });
+        }
 
-    next();
+        req.validatedData = result.data;
+        next();
 }

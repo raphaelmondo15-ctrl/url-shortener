@@ -2,7 +2,7 @@ import { createShortLink, processRedirect } from '../services/link.service.js';
 
 export const createLink = async (req, res) => {
     try {
-        const { target_url } = req.body;
+        const { target_url } = req.validatedData;
         const newLink = await createShortLink(target_url);
         res.status(201).json(newLink);
     } catch (error) {
