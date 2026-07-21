@@ -1,5 +1,6 @@
 import pool from '../config/db.js';
 import { generateShortCode } from './shortCode.service.js';
+import { buildPaginationQuery } from '../utils/pagination.js';
 
 export async function createLink({
     target_url,
@@ -126,14 +127,40 @@ export async function getLinkMetadata(code) {
     return rows[0];
 }
 
-export async function getClickslog(code) {
-    const { rows } = await pool.query(
-        `SELECT c.id, c.user_agent, c.referrer, c.created_at
+// export async function getClickslog(code) {
+//     const { rows } = await pool.query(
+//         `SELECT c.id, c.user_agent, c.referrer, c.created_at
+//         FROM clicks c
+//         JOIN links l ON c.link_id = l.id
+//         WHERE l.code = $1 ORDER BY c.created_at DESC`,
+//         [code]
+//     );
+
+//     return rows;
+// }
+
+export async function getClickslog(code, after, limit) {
+    const values = [code];
+    let query = `
+        SELECT c.id, c.user_agent, c.referrer, c.created_at
         FROM clicks c
         JOIN links l ON c.link_id = l.id
-        WHERE l.code = $1 ORDER BY c.created_at DESC`,
-        [code]
-    );
+        WHERE l.code = $1
+    `;
 
-    return rows;
+    if (after) {
+        values.push(after);
+        query += ` AND c.created_at > $${values.length}`;
+    }
+
+    query += ' ORDER BY c.created_at DESC';
+
+    if (limit) {
+        values.push(limit);
+        query += ` LIMIT $${values.length}`;
+    }
+
+    const { rows } = await pool.query(query, values);
+
+    return buildPaginationQuery(rows, 'created_at');
 }
