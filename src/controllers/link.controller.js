@@ -1,7 +1,9 @@
 import {
     createLink as createLinkService,
     processRedirect,
-    deleteLinkByCode
+    deleteLinkByCode,
+    getLinkMetadata,
+    getClickslog
 } from '../services/link.service.js';
 
 export const createLink = async (req, res) => {
@@ -82,3 +84,48 @@ export const deleteLink = async (req, res) => {
         });
     }
 };
+
+export const getLinkInfo = async (req, res) => {
+    try {
+        const { code } = req.params;
+
+        const link = await getLinkMetadata(code);
+
+        return res.status(200).json(link);
+
+    } catch (error) {
+
+        if (error.message === 'LINK_NOT_FOUND') {
+            return res.status(404).json({
+                error: 'Link not found'
+            });
+        }
+
+        return res.status(500).json({
+            error: error.message
+        });
+    }
+};
+
+export const getClickslog = async (req, res) => {
+    try {
+        const { code } = req.params;
+
+        const clicks = await getClickslog(code);
+
+        return res.status(200).json(clicks);
+
+    } catch (error) {
+
+        if (error.message === 'LINK_NOT_FOUND') {
+            return res.status(404).json({
+                error: 'Link not found'
+            });
+        }
+
+        return res.status(500).json({
+            error: error.message
+        });
+    }
+};
+    

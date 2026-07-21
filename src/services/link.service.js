@@ -112,3 +112,28 @@ try {
 }
 
 }
+
+export async function getLinkMetadata(code) {
+    const { rows } = await pool.query(
+        'SELECT id, code, target_url, created_at, expires_at, click_count FROM links WHERE code = $1',
+        [code]
+    );
+
+    if (rows.length === 0) {
+        throw new Error('LINK_NOT_FOUND');
+    }
+
+    return rows[0];
+}
+
+export async function getClickslog(code) {
+    const { rows } = await pool.query(
+        `SELECT c.id, c.user_agent, c.referrer, c.created_at
+        FROM clicks c
+        JOIN links l ON c.link_id = l.id
+        WHERE l.code = $1 ORDER BY c.created_at DESC`,
+        [code]
+    );
+
+    return rows;
+}
