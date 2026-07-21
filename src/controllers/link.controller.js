@@ -1,48 +1,84 @@
-import { createShortLink, processRedirect } from '../services/link.service.js';
+import {
+    createLink as createLinkService,
+    processRedirect,
+    deleteLinkByCode
+} from '../services/link.service.js';
 
 export const createLink = async (req, res) => {
     try {
         const { target_url, code, expires_at } = req.validatedData;
-        const newLink = await createShortLink(target_url, code, expires_at);
-        res.status(201).json(newLink);
+
+        const newLink = await createLinkService({
+            target_url,
+            code,
+            expires_at
+        });
+
+        return res.status(201).json(newLink);
+
     } catch (error) {
-        res.status(500).json({ error: error.message });
+
+        if (error.message === 'CODE_ALREADY_EXISTS') {
+            return res.status(409).json({
+                error: 'Code already taken'
+            });
+        }
+
+        return res.status(500).json({
+            error: error.message
+        });
     }
 };
 
-export const getOriginalLink = async (req, res) => {
+export const redirectLink = async (req, res) => {
     try {
-        const { short_code } = req.params;
-        const link = await processRedirect(short_code, {
+        const { code } = req.params;
+
+        const link = await processRedirect(code, {
             referrer: req.get('referer') || null,
             userAgent: req.get('user-agent') || null
         });
 
-        res.redirect(link.target_url);
+        return res.redirect(302, link.target_url);
+
     } catch (error) {
+
         if (error.message === 'LINK_NOT_FOUND') {
-            return res.status(404).json({ error: 'Link not found' });
+            return res.status(404).json({
+                error: 'Link not found'
+            });
         }
 
         if (error.message === 'LINK_EXPIRED') {
-            return res.status(410).json({ error: 'Link has expired' });
+            return res.status(410).json({
+                error: 'Link has expired'
+            });
         }
 
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            error: error.message
+        });
     }
 };
 
 export const deleteLink = async (req, res) => {
     try {
-        const { short_url } = req.params;
-        const result = await deleteLinkByShortCode(short_url);
+        const { code } = req.params;
 
-        res.status(200).json({ message: 'Link deleted successfully', result });
+        await deleteLinkByCode(code);
+
+        return res.sendStatus(204);
+
     } catch (error) {
+
         if (error.message === 'LINK_NOT_FOUND') {
-            return res.status(404).json({ error: 'Link not found' });
+            return res.status(404).json({
+                error: 'Link not found'
+            });
         }
 
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({
+            error: error.message
+        });
     }
 };
