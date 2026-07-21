@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { createLink, redirectLink } from '../controllers/link.controller.js';
 import { validateLink } from '../middleware/validateLink.middleware.js';
 import { getLinkMetadata } from '../controllers/link.controller.js';
+import { getClickslog } from '../controllers/link.controller.js';
 import { deleteLink } from '../controllers/link.controller.js';
 
 
