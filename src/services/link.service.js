@@ -57,3 +57,58 @@ export async function createLink({
 
     return rows[0];
 }
+
+export async function processRedirect(code, clickData) {
+const client = await pool.connect();
+    
+try {
+    await client.query('BEGIN'); 
+    const { rows } = await client.query(
+        'SELECT id, target_url, expires_at FROM links WHERE code = $1',
+        [code]
+    );
+
+    if (rows.length === 0) {
+        throw new Error('LINK_NOT_FOUND');
+    }
+
+    const link = rows[0];
+
+     if (
+            link.expires_at &&
+            new Date(link.expires_at) < new Date()
+        ) {
+            throw new Error('LINK_EXPIRED');
+        }
+
+    await client.query(
+        'UPDATE links SET click_count = click_count + 1 WHERE id = $1',
+        [link.id]
+    );
+
+    await client.query(
+        `INSERT INTO clicks
+        (
+            link_id,
+            user_agent,
+            referrer
+        )
+        VALUES ($1, $2, $3, $4)`,
+        [
+            link.id,
+            clickData.user_agent,
+            clickData.referrer
+        ]
+    );
+
+    await client.query('COMMIT');
+
+    return link;
+} catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+} finally {
+    client.release();
+}
+
+}
