@@ -4,7 +4,7 @@ export async function createTables() {
     try {
       await pool.query  (`   CREATE TABLE If NOT EXISTS links (
     id SERIAL PRIMARY KEY,
-    short_url VARCHAR(16) NOT NULL UNIQUE,
+    code VARCHAR(16) NOT NULL UNIQUE,
     target_url TEXT NOT NULL,
     created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMPTZ,
