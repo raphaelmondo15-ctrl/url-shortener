@@ -22,4 +22,16 @@ app.get('/test-db', async (req, res) => {
 });
 
 
+app.use((req, res, next) => {
+    res.status(404).json({ error: 'Route not found' });
+});
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Internal Server Error', details: err.message });
+});
+
+
+
+
 export default app;

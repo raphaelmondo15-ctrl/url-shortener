@@ -3,8 +3,9 @@ import {
     processRedirect,
     deleteLinkByCode,
     getLinkMetadata,
-    getClickslog
+    getClickLogForExport
 } from '../services/link.service.js';
+import { toCSV } from '../utils/csv.js';
 
 export const createLink = async (req, res) => {
     try {
@@ -107,11 +108,12 @@ export const getLinkInfo = async (req, res) => {
     }
 };
 
-export const getClickslog = async (req, res) => {
+export const getClicksLog = async (req, res) => {
     try {
         const { code } = req.params;
+        const { after, limit } = req.query;
 
-        const clicks = await getClickslog(code);
+        const clicks = await getClicksLog(code, after, limit);
 
         return res.status(200).json(clicks);
 
@@ -127,5 +129,28 @@ export const getClickslog = async (req, res) => {
             error: error.message
         });
     }
-};
-    
+}
+ 
+export const exportClicks = async (req, res) => {
+    try {
+        const { code } = req.params;
+
+        const clicks = await getClickLogForExport(code);
+
+        const csv = toCSV(clicks);
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="${code}_clicks.csv"`); 
+        return res.status(200).send(csv);
+    } catch (error) {
+        if (error.message === 'LINK_NOT_FOUND') {
+            return res.status(404).json({
+                error: 'Link not found'
+            });
+        }
+
+        return res.status(500).json({
+            error: error.message
+        });
+    }
+}

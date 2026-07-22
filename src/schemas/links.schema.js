@@ -10,7 +10,7 @@ export const linkSchema = z.object({
     .optional(),
 
     expires_at: z
-    .iso()
+    .string()
     .datetime()
     .optional()
 })

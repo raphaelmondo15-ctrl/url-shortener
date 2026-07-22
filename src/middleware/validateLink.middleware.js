@@ -1,7 +1,7 @@
-import { createLinkSchema } from '../schemas/link.schema.js';
+import { linkSchema } from '../schemas/links.schema.js';
 
 export function validateLink(req, res, next) {
-    const parsed = createLinkSchema.safeParse(req.body);
+    const parsed = linkSchema.safeParse(req.body);
 
     if (!parsed.success) {
         return res.status(400).json({
