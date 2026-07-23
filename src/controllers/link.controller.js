@@ -3,6 +3,7 @@ import {
     processRedirect,
     deleteLinkByCode,
     getLinkMetadata,
+    getClickLog as getClickLogService,
     getClickLogForExport
 } from '../services/link.service.js';
 import { toCSV } from '../utils/csv.js';
@@ -113,11 +114,13 @@ export const getClicksLog = async (req, res) => {
         const { code } = req.params;
         const { after, limit } = req.query;
 
-        const clicks = await getClicksLog(code, after, limit);
+        const clicks = await getClickLogService(code, after, limit);
 
         return res.status(200).json(clicks);
 
     } catch (error) {
+
+        console.log("GET CLICKS ERROR", error);
 
         if (error.message === 'LINK_NOT_FOUND') {
             return res.status(404).json({

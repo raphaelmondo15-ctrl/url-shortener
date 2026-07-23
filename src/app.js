@@ -10,12 +10,10 @@ import { healthCheck } from './controllers/health.controller.js';
 
 const app = express();
 app.use(express.json());
-createTables();
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(router);
 app.use('/health', healthCheck);
-
-app.get('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/', (req, res) => {
     res.send('Welcome to the URL Shortener API');
