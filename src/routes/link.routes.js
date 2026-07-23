@@ -28,10 +28,13 @@ import {
     exportClicks,
     deleteLink
 } from '../controllers/link.controller.js';
+import { healthCheck } from '../controllers/health.controller.js';
 
 import { validateLink } from '../middleware/validateLink.middleware.js';
 
 const router = Router();
+
+router.get('/health', healthCheck);
 
 router.post('/', validateLink, createLink);
 
